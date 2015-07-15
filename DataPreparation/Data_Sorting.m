@@ -2,24 +2,23 @@
 % PURPOSE
 % 1 Sort and save data in Delphi format
 % 2 Sort and save data in Cartesian format
-% 3 Select a small part of the data to reduce computation time for first
+% - Select a small part of the data to reduce computation time for first
 %   tests
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 addpath('Functions/');
 
-%% Load data & Parameters
-cd ..
-fileID = 'ComplexData4Chris_data.mat';
+%% 1 Load data & Parameters
+
+% Data
+fileID = '../Seam4Chris.mat';
 SavedData = load(fileID); clear fileID
-
-fileID = 'Parameters.mat';
-Parameters = load(fileID); clear fileID
-cd Deblending
-
 p = SavedData.p;
 
 % PARAMETERS
+fileID = '../Data/Parameters.mat';
+Parameters = load(fileID); clear fileID
+
 dt  = Parameters.dt;    % Duration of a time sample in seconds
 di  = Parameters.di;    % Inline spacing in metres
 dx  = Parameters.dx;    % Crossline spacing in metres
@@ -31,10 +30,9 @@ Nsi = Parameters.Nsi;   % Number of inline sources
 Nr  = Parameters.Nr;    % Number of receivers
 Ns  = Parameters.Ns;    % Number of sources
 
-%% Sort data in Delphi format
+%% 2 Sort data in Delphi format
 
-% DATA FORMAT
-% Time x Inline sources x Crossline sources
+% DATA FORMAT: Nt x Nsx x Nsi 
 
 % DESIRED DATA FORMAT
 % Time x Crossline * Inline receivers x Crossline*Inline sources
