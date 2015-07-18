@@ -6,7 +6,7 @@
 %   tests
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-addpath('Functions/');
+addpath('../Functions/');
 
 %% 1 Load data & Parameters
 
@@ -35,12 +35,12 @@ Ns  = Parameters.Ns;    % Number of sources
 % DATA FORMAT: Nt x Nsx x Nsi 
 
 % DESIRED DATA FORMAT
-% Time x Crossline * Inline receivers x Crossline*Inline sources
+% Time x Crossline*Inline receivers x Crossline*Inline sources
 data = zeros(Nt,Nr,Ns);
 
 % Sort data
 for in = 1:Nsi
-    data( :,1,1+(in-1)*Nsx : in*Nsx ) = p(:,in,:);
+    data( :,1,1+(in-1)*Nsx : in*Nsx ) = p(:,:,in);
 end
 clear p
 

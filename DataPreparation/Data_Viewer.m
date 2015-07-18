@@ -27,10 +27,10 @@ p = data.p;
 %% 2 Look at the data
 
 % Data sorting: Time x Crossline sources x Inline sources
-figure(1);imagesc(squeeze(p(:,50,:))); colormap gray
+figure(1);imagesc(squeeze(p(:,xr-20:xr,50))); colormap gray
 
 % Time slice
-figure(2); imagesc(squeeze(p(200,:,:))); colormap gray
+figure(2); imagesc(squeeze(p(120,xr-20:xr,:))); colormap gray
 
 % Where is the receiver location? Early time slice
 figure(3); imagesc(squeeze(p(5,:,:))); colormap gray
@@ -120,5 +120,5 @@ set(gca,'YTickLabel',{num2str(df*0),num2str(df*100),num2str(df*200),num2str(df*3
 
 
 % Save parameters to a file
-save('../Data/Parameters.mat','Nt','Nrx','Nri','Nsx','Nsi','Nr','Ns','dt','dx',...
-     'di','vmin','fmin','fmax','fal','df','dkx','dki','T');
+%save('../Data/Parameters.mat','Nt','Nrx','Nri','Nsx','Nsi','Nr','Ns','dt','dx',...
+     %'di','vmin','fmin','fmax','fal','df','dkx','dki','T');
