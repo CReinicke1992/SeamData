@@ -2,8 +2,10 @@
 % PURPOSE
 % 1 Sort and save data in Delphi format
 % 2 Sort and save data in Cartesian format
-% - Select a small part of the data to reduce computation time for first
+% 3 Top mute
+% 4 Select a small part of the data to reduce computation time for first
 %   tests
+% 5 Build a taper for the crossline direction to avoid stripes in fk
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 addpath('../Functions/');
@@ -14,6 +16,7 @@ addpath('../Functions/');
 fileID = '../Seam4Chris.mat';
 SavedData = load(fileID); clear fileID
 p = SavedData.p;
+
 
 % PARAMETERS
 fileID = '../Data/Parameters.mat';
@@ -29,6 +32,8 @@ Nsx = Parameters.Nsx;   % Number of crossline sources
 Nsi = Parameters.Nsi;   % Number of inline sources
 Nr  = Parameters.Nr;    % Number of receivers
 Ns  = Parameters.Ns;    % Number of sources
+xr  = Parameters.xr;    % Receiver crossline position
+yr  = Parameters.yr;    % Receiver inline position
 
 %% 2.1 Sort data in Delphi format
 
@@ -51,10 +56,28 @@ save('../Data/p_raw_Delphi.mat','data');
 data5d = trans_5D_3D(data,Nri,Nsi);
 save('../Data/p_raw_Cartesian.mat','data5d');
 
-%% 3 Reduce data size
+%% 3 Top mute
+%   -> Suppress the direct wave
+
+for xs = 1:Nsx
+    for ys = 1:Nsi
+        
+        dist  = 12.5*sqrt( (xr-xs)^2 + (yr-ys)^2 );      % Receiver source distance 
+        v     = 1500;                                    % Water Velocity
+        delay = 20*dt;                                   % Supress tail of the direct wave
+        t     = round( (dist/v + delay)/dt );
+  
+        data5d(1:t,1,1,xs,ys) = 0;%* data5d(1:t,1,1,xs,ys);
+        
+    end
+end
+
+%% 4.1 Reduce data size
 
 % Reduce number crossline sources
- Nsx = 21; 
+Nsx = 21; 
+dkx = 1/Parameters.dx/Nsx;     % Size of an crossline wavenumber sample,  1/dx/Nsx;
+Ns  = Nsx * Nsi;
 
 % Write a new parameter file with updated values
 % Copy the file Parameters.mat
@@ -65,45 +88,46 @@ fileID = '../Data/Parameters_red.mat';
 m = matfile(fileID,'Writable',true);
 
 m.Nsx = Nsx;
-m.Ns  = Nsx * Nsi;
-m.dkx = 1/Parameters.dx/Nsx;     % Size of an crossline wavenumber sample,  1/dx/Nsx;
+m.Ns  = Ns;
+m.dkx = dkx;
 
-fileID = 'Parameters_red.mat';
-Parameters_red = load(fileID); clear fileID
-
-cd Deblending/
-
-%% Save data with reduced size
+%% 4.2 Save data with reduced size
 
 % Define a range of the crossline sources which should be extracted
-% One could also choose crosslines 1:Nsx_red but then the data will be less
-% symmetric
-left  = ceil(  0.5 * ( size(data5d,4) - Parameters_red.Nsx )  ); 
-right = left + Nsx - 1;
+%   -> Choose 20 sources to the "right" of the receiver
+left  = xr; 
+right = left + 20;
 
-% For /Users/christianreinicke/Dropbox/MasterSemester/SyntheticData/V3
-%left  = ceil(  0.5 * ( size(data5d,4) - 2*Parameters_red.Nsx )  ); 
-%right = left + 2*Nsx - 1;
-
-% For /Users/christianreinicke/Dropbox/MasterSemester/SyntheticData/V4
-%left  = ceil(  0.5 * size(data5d,4) ); 
-%right = left + Nsx - 1;
-
-
-data5d_red = data5d(1:Parameters_red.Nt,:,:,left:1:right,1:1:Parameters_red.Nsi); clear data5d
+data5d_red = data5d(:,:,:,left:right,:);
 data_red = trans_5D_3D(data5d_red);
 
-%save('Raw-Data/data_red_Cartesian_Format.mat','data5d_red'); clear data5d_red
-%save('Raw-Data/data_red_Delphi_Format.mat','data_red');
+save('../Data/p_red_Cartesian.mat','data5d_red'); %clear data5d_red
+save('../Data/p_red_Delphi.mat','data_red');
 
-%% Plot data with reduced size
+%% 4.3 Plot data with reduced size
 
 % Plot data in Delphi format
-data2d = reshape(data_red(:,1,:),Parameters_red.Nt,Parameters_red.Ns); 
-figure(1); imagesc(data2d); colormap gray; clear data2d
-xlabel('Source number','fontweight','bold');
-ylabel('Time (4ms/sample)','fontweight','bold');
-set(gca,'FontSize',14);
-title('Data in Delphi format (reduced size)');
-savefig('Plots/Data_red_Delphi_Format');
+data2d = reshape(data_red(:,1,:),Nt,Ns); 
+figure; imagesc(data2d,[-0.0001,0.0001]); colormap gray; clear data2d
+
+
+%% 5 Taper in crossline direction
+
+taper = ones(size(data5d_red));
+m = (1 + cos((0:3)/3*pi)) ./ 2;
+n = max(size(m));
+taper(:,:,:,1:n,:)         = repmat( flip(m,2),Nt,Nrx,Nri,1,Nsi );
+taper(:,:,:,end-n+1:end,:) = repmat( m,        Nt,Nrx,Nri,1,Nsi );
+
+save('../Data/xline_taper.mat','taper');
+
+
+% data5d_red = taper.*data5d_red;
+% 
+% Data5d_red = fftn(data5d_red(:,1,1,:,:));
+% figure; imagesc(abs(squeeze(Data5d_red(:,1,1,:,20))));
+% 
+% Data5d_red = fftn(squeeze(data5d_red(:,1,1,:,:)));
+% figure; imagesc(abs(squeeze(Data5d_red(:,:,20))));
+
 

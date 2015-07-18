@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PURPOSE
 % 0 Load data and parameters
-% 1 Build a fkk mask
+% 1 Build an fkk mask
 % 2 Plot fkk mask
 % 3 Apply fkk mask
 % 4 Save and plot data in xt domain after fkk filtering
@@ -9,21 +9,20 @@
 % 6 Save and plot data in fkk domain after fkk filtering
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-addpath('Functions/');
+addpath('../Functions/');
 
 %% 0 Load data & Parameters
 
 % To keep computational effort small, I use only a small part of the data
-fileID = 'Raw-Data/data_red_Cartesian_Format.mat';
+fileID = '../Data/p_red_Cartesian.mat';
 SavedData = load(fileID); clear fileID
 
 % Data in Cartesian format
 data = SavedData.data5d_red; clear SavedData
 
-cd ..
-fileID = 'Parameters_red.mat';
+fileID = '../Data/Parameters_red.mat';
 Parameters_red = load(fileID); clear fileID
-cd Deblending
+
 
 
 % Parameters
@@ -45,6 +44,19 @@ df   = Parameters_red.df;    % Size of a frequency sample in Hz
 dkx  = Parameters_red.dkx;   % Size of a crossline wavenumber sample
 dki  = Parameters_red.dki;   % Size of an inline wavenumber sample
 
+
+%% 0.1 Taper the data
+
+taper = ones(size(data));
+m = (1 + cos((0:3)/3*pi)) ./ 2;
+n = max(size(m));
+taper(:,:,:,1:n,:)         = repmat( flip(m,2),Nt,Nrx,Nri,1,Nsi );
+taper(:,:,:,end-n+1:end,:) = repmat( m,        Nt,Nrx,Nri,1,Nsi );
+
+%taper(:,:,:,:,1:n)         = repmat( flip(m,2),Nt,Nrx,Nri,Nsx,1 );
+%taper(:,:,:,:,end-n+1:end) = repmat( m,        Nt,Nrx,Nri,Nsx,1 );
+
+
 %% 1 Build a 5d fkk mask
 
 fcut = fmax;            % Choose fal or fmax
@@ -58,7 +70,7 @@ tune = 0.15;            % The minimum velocity in the data appears to be
 dim = 3;                % A 3d mask should be build
 
 mask = fkmask5d(data,dt,dx,di,fcut,dim,tune,Nri,Nsi,flow);
-save('Data/FK/fkmask_red.mat','mask');
+%save('Data/FK/fkmask_red.mat','mask');
 
 %% 2 Plot fkk mask
 
@@ -74,7 +86,7 @@ set(gca,'FontSize',14);
 tit = sprintf('3d FKK Filter (Frequency slice at %.2f Hz)',slice);
 title(tit);
 path = sprintf('Plots/FK/fkmask_red_%dHz_slice',round(slice));
-savefig(path);
+%savefig(path);
 close(fig1); clear mask40
 
 % Plot inline slice of the mask for the crossline 1
@@ -89,15 +101,15 @@ set(gca,'FontSize',14);
 tit = sprintf('3d FKK Filter (Inline slice at crossline number %d)',slice);
 title(tit);
 path = 'Plots/FK/fkmask_red_inline_slice';
-savefig(path);
+%savefig(path);
 close(fig1); clear mask1
 
 %% 3 Apply the fkk mask
 
 data_fil = fk3d_mod(data,mask,Nri,Nsi); clear mask
 data_fil3d = trans_5D_3D(data_fil);
-save('Data/Data_red_Delphi_Bandlimited.mat','data_fil3d');
-save('Data/Data_red_Cartesian_Bandlimited.mat','data_fil');
+%save('Data/Data_red_Delphi_Bandlimited.mat','data_fil3d');
+%save('Data/Data_red_Cartesian_Bandlimited.mat','data_fil');
 
 %% 4 Plot fkk filtered data in Delphi format in xt domain
 data2d = reshape(data_fil3d(:,1,:),Nt,Ns);  clear data_fil3d
@@ -107,7 +119,7 @@ ylab = sprintf('Time (%.2fms / sample)',1000*dt);
 ylabel(ylab,'fontweight','bold');
 set(gca,'FontSize',14);
 title('FKK filtered data (Delphi, reduced size)');
-savefig('Plots/Data_red_Delphi_Bandlimited');
+%savefig('Plots/Data_red_Delphi_Bandlimited');
 clear data2d
 close(fig1);
 
@@ -116,8 +128,8 @@ close(fig1);
 % Save data in FKK domain in both formats Delphi and Cartesian
 Data = fftn(data); clear data
 Data3d = trans_5D_3D(Data);
-save('Data/FK/Data_red_Cartesian.mat','Data'); clear Data
-save('Data/FK/Data_red_Delphi.mat','Data3d');
+%save('Data/FK/Data_red_Cartesian.mat','Data'); clear Data
+%save('Data/FK/Data_red_Delphi.mat','Data3d');
 
 % Plot data in FKK domain in Delphi format
 Data2d = reshape(Data3d(:,1,:),Nt,Ns); clear Data3d
@@ -128,7 +140,7 @@ xlabel(xlab,'fontweight','bold');
 ylabel(ylab,'fontweight','bold');
 set(gca,'FontSize',14);
 title('Raw data in FKK domain (Delphi, reduced size)');
-savefig('Plots/FK/Data_red_Delphi');
+%savefig('Plots/FK/Data_red_Delphi');
 close(fig1); clear Data2d 
 
 %% 6 FKK domain bandlimited data
@@ -136,8 +148,8 @@ close(fig1); clear Data2d
 % Save FKK filtered data in FKK domain in both formats Delphi and Cartesian
 Data_fil = fftn(data_fil); clear data_fil
 Data3d_fil = trans_5D_3D(Data_fil);
-save('Data/FK/Data_red_Cartesian_bandlimited.mat','Data_fil'); clear Data_fil
-save('Data/FK/Data_red_Delphi_bandlimited.mat','Data3d_fil');
+%save('Data/FK/Data_red_Cartesian_bandlimited.mat','Data_fil'); clear Data_fil
+%save('Data/FK/Data_red_Delphi_bandlimited.mat','Data3d_fil');
 
 % Plot FKK filtered data in FKK domain in Delphi format
 Data2d_fil = reshape(Data3d_fil(:,1,:),Nt,Ns); clear Data3d_fil
@@ -148,5 +160,5 @@ xlabel(xlab,'fontweight','bold');
 ylabel(ylab,'fontweight','bold');
 set(gca,'FontSize',14);
 title('FKK filtered data in FKK domain (Delphi, reduced size)');
-savefig('Plots/FK/Data_red_Delphi_bandlimited');
+%savefig('Plots/FK/Data_red_Delphi_bandlimited');
 close(fig1); clear Data2d_fil

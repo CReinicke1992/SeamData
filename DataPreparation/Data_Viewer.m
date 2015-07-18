@@ -123,4 +123,4 @@ set(gca,'YTickLabel',{num2str(df*0),num2str(df*100),num2str(df*200),num2str(df*3
 
 % Save parameters to a file
 save('../Data/Parameters.mat','Nt','Nrx','Nri','Nsx','Nsi','Nr','Ns','dt','dx',...
-     'di','vmin','fmin','fmax','fal','df','dkx','dki','T');
+     'di','vmin','fmin','fmax','fal','df','dkx','dki','T','xr','yr');
