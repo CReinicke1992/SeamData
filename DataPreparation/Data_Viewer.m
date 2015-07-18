@@ -26,6 +26,9 @@ p = data.p;
 
 %% 2 Look at the data
 
+xr  = 81;
+yr  = 81;
+
 % Data sorting: Time x Crossline sources x Inline sources
 figure(1);imagesc(squeeze(p(:,xr-20:xr,50))); colormap gray
 
@@ -34,8 +37,7 @@ figure(2); imagesc(squeeze(p(120,xr-20:xr,:))); colormap gray
 
 % Where is the receiver location? Early time slice
 figure(3); imagesc(squeeze(p(5,:,:))); colormap gray
-xr  = 81;
-yr  = 81;
+
 
 
 
@@ -92,7 +94,7 @@ scale = 12.5/50;
 
 % Upscaled Parameters
 dx  = scale*dx;           % Crossline spacing in metres
-di  = scale*dx;           % Inlince spacing in metres
+di  = scale*di;           % Inlince spacing in metres
 dkx = 1/dx/Nsx;     % Size of a crossline wavenumber sample
 dki = 1/di/Nsi;     % Size of an inline wavenumber sample
 
@@ -120,5 +122,5 @@ set(gca,'YTickLabel',{num2str(df*0),num2str(df*100),num2str(df*200),num2str(df*3
 
 
 % Save parameters to a file
-%save('../Data/Parameters.mat','Nt','Nrx','Nri','Nsx','Nsi','Nr','Ns','dt','dx',...
-     %'di','vmin','fmin','fmax','fal','df','dkx','dki','T');
+save('../Data/Parameters.mat','Nt','Nrx','Nri','Nsx','Nsi','Nr','Ns','dt','dx',...
+     'di','vmin','fmin','fmax','fal','df','dkx','dki','T');

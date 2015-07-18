@@ -30,7 +30,7 @@ Nsi = Parameters.Nsi;   % Number of inline sources
 Nr  = Parameters.Nr;    % Number of receivers
 Ns  = Parameters.Ns;    % Number of sources
 
-%% 2 Sort data in Delphi format
+%% 2.1 Sort data in Delphi format
 
 % DATA FORMAT: Nt x Nsx x Nsi 
 
@@ -44,48 +44,29 @@ for in = 1:Nsi
 end
 clear p
 
-%save('Raw-Data/data_Delphi_Format.mat','data');
+save('../Data/p_raw_Delphi.mat','data');
 
-% Plot data in Delphi format
-data2d = reshape(data(:,1,:),Nt,Ns); 
-figure(1); imagesc(100*data2d);
-xlabel('Source number','fontweight','bold');
-ylabel('Time (4ms/sample)','fontweight','bold');
-set(gca,'FontSize',14);
-title('Data in Delphi format');
-%savefig('Plots/Data_Delphi_Format');
-clear data2d
-
-%% Sort data in Cartesian format
+%% 2.2 Sort data in Cartesian format
 
 data5d = trans_5D_3D(data,Nri,Nsi);
-%save('Raw-Data/data_Cartesian_Format.mat','data5d');
+save('../Data/p_raw_Cartesian.mat','data5d');
 
-%% Reduce data size
+%% 3 Reduce data size
 
-% Reduce number of time samples and inline sources
-Nt = 1001;  Nsx = 51; Nsi = 51;  %Nsx = 21; Nsi = 51;
-
-%dx = 25;    di = 25;
+% Reduce number crossline sources
+ Nsx = 21; 
 
 % Write a new parameter file with updated values
-cd ..
 % Copy the file Parameters.mat
-copyfile('Parameters.mat','Parameters_red.mat');
+copyfile('../Data/Parameters.mat','../Data/Parameters_red.mat');
 
 % Update the parameters in the copy Parameters_red.mat
-fileID = 'Parameters_red';
+fileID = '../Data/Parameters_red.mat';
 m = matfile(fileID,'Writable',true);
-m.Nt  = Nt;
-m.Nsx = Nsx;
-m.Nsi = Nsi;
-m.Ns  = Nsx * Nsi;
-m.df  = 1/Parameters.dt/Nt;      % Size of a frequency sample in Hz
-m.dkx = 1/Parameters.dx/Nsx;     % Size of an crossline wavenumber sample,  1/dx/Nsx;
-m.dki = 1/Parameters.di/Nsi;     % Size of an inline wavenumber sample,     1/di/Nsi;
 
-%m.dx = dx;
-%m.di = di;
+m.Nsx = Nsx;
+m.Ns  = Nsx * Nsi;
+m.dkx = 1/Parameters.dx/Nsx;     % Size of an crossline wavenumber sample,  1/dx/Nsx;
 
 fileID = 'Parameters_red.mat';
 Parameters_red = load(fileID); clear fileID
