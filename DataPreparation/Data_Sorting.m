@@ -8,6 +8,10 @@
 % 5 Build a taper for the crossline direction to avoid stripes in fk
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+clear
+close all
+
+
 addpath('../Functions/');
 
 %% 1 Load data & Parameters
@@ -112,6 +116,9 @@ figure; imagesc(data2d,[-0.0001,0.0001]); colormap gray; clear data2d
 
 
 %% 5 Taper in crossline direction
+%   -> Only 21 sources in crossline direction, i.e. FFT artifacts are very
+%      likely
+%   -> A taper is supposed to reduce the artifacts
 
 taper = ones(size(data5d_red));
 m = (1 + cos((0:3)/3*pi)) ./ 2;
