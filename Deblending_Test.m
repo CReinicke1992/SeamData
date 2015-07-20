@@ -36,7 +36,7 @@ data3d  = my_data.data3d_fil; clear fileID my_data
 %% 1.2 Load the fkk-mask
 
 % Load the fkk-mask (Cartesian format)
-fileID = 'Data//fk/fkmask_x21.mat';
+fileID = 'Data/fk/fkmask_x21.mat';
 FKmask = load(fileID);
 fkmask = FKmask.mask; clear fileID Fkmask
 
