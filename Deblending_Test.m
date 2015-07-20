@@ -97,10 +97,9 @@ for pattern = 1:3
     elseif pattern == 3
         folder = '3-xline';
     end
-    pattern = 2;
     
     for t_g = 0:10:100 
-        t_g = 100;
+        
         % tg is supposed to be an even number, to make sure Nt + tg is
         % still an odd number to avoid fft artifacts
         if mod(t_g,2) ~= 0;
