@@ -63,7 +63,7 @@ clear fileID Parameters
 quality     = zeros(3,11);          % Number of row:     Number of pattern
                                     % Number of columns: Number of shooting windows
 time        = zeros(size(quality));
-%incoherency = zeros(size(quality));
+incoherency = zeros(size(quality));
 
 %% 3 Generate random series for time delays and source permutation
 
@@ -121,11 +121,12 @@ for pattern = 1:3
         
         % Create a 2d blending matrix
         g = gxin(t_g,Ns,Nsx,b,pattern,random_times,random_sources);
-        save(strcat(path,'g_matrix.mat'),'g')
+        mu = incoherency_dia(g,Nt);
+        %save(strcat(path,'g_matrix.mat'),'g')
         
         % Blend & deblend the data. Measure the computation time.
         bl = tic;
-        blend_deblend(data3d,fkmask,g,path_for_blend_deblend);
+        [~,Q] = blend_deblend_mod(data3d,fkmask,g,'Data');
         time_deblending = toc(bl);
      
         % Load quality factor
